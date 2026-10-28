@@ -1,0 +1,842 @@
+openapi: 3.0.3
+info:
+  title: Healthcare Backend API
+  version: 1.0.0
+  description: A robust Django REST Framework backend system for managing patients,
+    doctors, and patient-doctor mappings with secure JWT authentication.
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Authenticate with username and password to obtain JWT access and
+        refresh tokens.
+      summary: User login (obtain JWT tokens)
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: Provide a valid refresh token to obtain a new JWT access token.
+      summary: Refresh JWT access token
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: Registers a new user account with secure password hashing. Passwords
+        are never returned in responses.
+      summary: Register a new user
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/doctors/:
+    get:
+      operationId: doctors_list
+      description: List all doctor records. Supports filtering by specialization and
+        searching by name or specialization.
+      summary: List doctors
+      parameters:
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search doctors by name or specialization (case-insensitive substring
+          match).
+      - in: query
+        name: specialization
+        schema:
+          type: string
+        description: Filter doctors by specialization (case-insensitive substring
+          match).
+      tags:
+      - Doctors
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Doctor'
+          description: ''
+    post:
+      operationId: doctors_create
+      description: Create a new doctor profile.
+      summary: Add doctor
+      tags:
+      - Doctors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: ''
+  /api/doctors/{id}/:
+    get:
+      operationId: doctors_retrieve
+      description: Retrieve details of a doctor profile by ID.
+      summary: Retrieve doctor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this doctor.
+        required: true
+      tags:
+      - Doctors
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: ''
+    put:
+      operationId: doctors_update
+      description: Fully update a doctor profile.
+      summary: Update doctor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this doctor.
+        required: true
+      tags:
+      - Doctors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DoctorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: ''
+    patch:
+      operationId: doctors_partial_update
+      description: Partially update a doctor profile.
+      summary: Partially update doctor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this doctor.
+        required: true
+      tags:
+      - Doctors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: ''
+    delete:
+      operationId: doctors_destroy
+      description: Delete a doctor profile.
+      summary: Delete doctor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this doctor.
+        required: true
+      tags:
+      - Doctors
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/mappings/:
+    get:
+      operationId: mappings_list
+      description: List mappings for patients owned by the authenticated user (or
+        all mappings for staff users). Supports filtering by patient_id and doctor_id.
+      summary: List patient-doctor mappings
+      parameters:
+      - in: query
+        name: doctor_id
+        schema:
+          type: integer
+        description: Filter mappings by doctor ID (must be a valid integer).
+      - in: query
+        name: patient_id
+        schema:
+          type: integer
+        description: Filter mappings by patient ID (must be a valid integer).
+      tags:
+      - Mappings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mapping'
+          description: ''
+    post:
+      operationId: mappings_create
+      description: Map an eligible patient owned by the authenticated user to a doctor.
+        Duplicate mappings are rejected.
+      summary: Create mapping
+      tags:
+      - Mappings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mapping'
+          description: ''
+  /api/mappings/{id}/:
+    get:
+      operationId: mappings_retrieve
+      description: Retrieve details of a patient-doctor mapping.
+      summary: Retrieve mapping
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient doctor mapping.
+        required: true
+      tags:
+      - Mappings
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mapping'
+          description: ''
+    put:
+      operationId: mappings_update
+      description: Fully update a patient-doctor mapping.
+      summary: Update mapping
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient doctor mapping.
+        required: true
+      tags:
+      - Mappings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MappingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mapping'
+          description: ''
+    patch:
+      operationId: mappings_partial_update
+      description: Partially update a patient-doctor mapping.
+      summary: Partially update mapping
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient doctor mapping.
+        required: true
+      tags:
+      - Mappings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMappingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMappingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMappingRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mapping'
+          description: ''
+    delete:
+      operationId: mappings_destroy
+      description: Delete a patient-doctor mapping.
+      summary: Delete mapping
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient doctor mapping.
+        required: true
+      tags:
+      - Mappings
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/patients/:
+    get:
+      operationId: patients_list
+      description: List all patients owned by the authenticated user (or all patients
+        for staff users).
+      summary: List patients
+      tags:
+      - Patients
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Patient'
+          description: ''
+    post:
+      operationId: patients_create
+      description: Create a new patient record. The owner is automatically assigned
+        to the authenticated user.
+      summary: Create patient
+      tags:
+      - Patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{id}/:
+    get:
+      operationId: patients_retrieve
+      description: Retrieve details of a patient owned by the authenticated user (or
+        any for staff).
+      summary: Retrieve patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - Patients
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    put:
+      operationId: patients_update
+      description: Fully update a patient record owned by the authenticated user.
+      summary: Update patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - Patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    patch:
+      operationId: patients_partial_update
+      description: Partially update a patient record owned by the authenticated user.
+      summary: Partially update patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - Patients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    delete:
+      operationId: patients_destroy
+      description: Delete a patient record owned by the authenticated user.
+      summary: Delete patient
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this patient.
+        required: true
+      tags:
+      - Patients
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        specialization:
+          type: string
+          maxLength: 100
+        experience:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - experience
+      - id
+      - name
+      - specialization
+    DoctorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        specialization:
+          type: string
+          minLength: 1
+          maxLength: 100
+        experience:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - experience
+      - name
+      - specialization
+    Mapping:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        doctor:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        doctor_name:
+          type: string
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assigned_at
+      - doctor
+      - doctor_name
+      - id
+      - patient
+      - patient_name
+    MappingRequest:
+      type: object
+      properties:
+        patient:
+          type: integer
+        doctor:
+          type: integer
+      required:
+      - doctor
+      - patient
+    PatchedDoctorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        specialization:
+          type: string
+          minLength: 1
+          maxLength: 100
+        experience:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    PatchedMappingRequest:
+      type: object
+      properties:
+        patient:
+          type: integer
+        doctor:
+          type: integer
+    PatchedPatientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        age:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        gender:
+          type: string
+          minLength: 1
+          maxLength: 10
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        age:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        gender:
+          type: string
+          maxLength: 10
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - age
+      - created_at
+      - gender
+      - id
+      - name
+      - user
+    PatientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        age:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        gender:
+          type: string
+          minLength: 1
+          maxLength: 10
+      required:
+      - age
+      - gender
+      - name
+    Register:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - username
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 6
+      required:
+      - email
+      - password
+      - username
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: Authentication
+  description: User registration, login, and token refresh
+- name: Patients
+  description: Patient records and ownership-based management
+- name: Doctors
+  description: Doctor directory, search, and filtering
+- name: Mappings
+  description: Patient-to-doctor assignments and filters

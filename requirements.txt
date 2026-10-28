@@ -1,0 +1,28 @@
+# ==============================================================================
+# Django Healthcare Backend API - Production & Runtime Dependencies
+# ==============================================================================
+
+# Core Framework & REST API
+Django==6.1
+djangorestframework==3.18.3
+djangorestframework-simplejwt==5.5.1
+
+# PostgreSQL Database Adapter
+psycopg2-binary==2.9.11
+
+# Environment Configuration
+python-decouple==3.8
+
+# OpenAPI 3.0 Schema & Swagger UI / ReDoc
+drf-spectacular==0.30.0
+
+# Direct & Required Transitive Dependencies
+asgiref==3.12.1
+sqlparse==0.5.5
+tzdata==2025.2
+PyYAML==6.0.3
+uritemplate==4.2.0
+inflection==0.5.1
+jsonschema==4.25.0
+PyJWT==2.10.1
+cryptography==46.0.7
